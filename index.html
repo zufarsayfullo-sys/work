@@ -1,0 +1,208 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Navigate Intermediate Vocab</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        :root { --primary: #6c5ce7; --success: #55efc4; --error: #ff7675; --warning: #ffeaa7; }
+        body { 
+            font-family: 'Poppins', sans-serif; margin: 0; height: 100vh; display: flex; justify-content: center; align-items: center;
+            background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), 
+                        url('https://images.unsplash.com/photo-1454165833767-027ffea9e778?auto=format&fit=crop&w=1920&q=80');
+            background-size: cover; background-position: center; color: white; overflow: hidden;
+        }
+        .quiz-container { 
+            background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            padding: 30px; border-radius: 30px; box-shadow: 0 25px 50px rgba(0,0,0,0.8);
+            width: 95%; max-width: 800px; text-align: center; border: 1px solid rgba(255,255,255,0.1);
+        }
+        .word-bank { background: rgba(108, 92, 231, 0.2); padding: 15px; border-radius: 15px; margin-bottom: 20px; font-weight: 600; color: var(--warning); border: 1px solid var(--primary); font-size: 0.9rem; line-height: 1.6; }
+        .sentence-area { font-size: 1.2rem; line-height: 1.6; margin-bottom: 25px; min-height: 100px; display: flex; align-items: center; justify-content: center; flex-wrap: wrap; }
+        input[type="text"] {
+            background: transparent; border: none; border-bottom: 2px dashed var(--primary); color: var(--success);
+            font-size: 1.2rem; font-weight: 600; text-align: center; outline: none; width: 260px; margin: 0 8px;
+        }
+        #next-btn { 
+            padding: 12px 40px; background: linear-gradient(45deg, #6c5ce7 0%, #a29bfe 100%);
+            color: white; border: none; border-radius: 50px; cursor: pointer; font-weight: bold; transition: 0.3s;
+        }
+        .hidden { display: none; }
+        #version-tag { font-size: 0.8rem; opacity: 0.6; margin-top: 15px; }
+    </style>
+</head>
+<body>
+
+<div class="quiz-container">
+    <div id="start-screen">
+        <h2>Career Vocabulary Challenge</h2>
+        <p>Complete 9 sentences using the correct phrases.<br><b>3 words will not be used.</b></p>
+        <input type="text" id="student-name" placeholder="Full Name" style="background: rgba(255,255,255,0.1); border: 2px solid var(--primary); border-radius: 10px; color: white; padding: 10px; margin-bottom: 20px; width: 70%; text-align: center;">
+        <br>
+        <button id="next-btn" onclick="startQuiz()">Start Attempt</button>
+    </div>
+
+    <div id="main-quiz" class="hidden">
+        <div class="word-bank">
+            career prospects, job satisfaction, occupation, promotion, qualification, redundant, rent-free accommodation, salary, sick/holiday pay, unemployed, working conditions, working hours
+        </div>
+        <div id="quiz-content">
+            <div class="sentence-area" id="sentence-display"></div>
+            <div id="feedback" style="margin-bottom: 15px; font-weight: bold; min-height: 25px;"></div>
+            <button id="next-btn" onclick="handleButtonClick()">Check Answer</button>
+            <div id="version-tag"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzjaoBxGbsuMNHNvenbb_3wAw1XKuGLHSFoSHbvT3NL0zAkFbWSppPQVyYLxjTxCJFp/exec";
+
+    const allVersions = [
+        // VERSION 1
+        [
+            { s: "He lost his job when the company closed, so he was made", ans: "redundant" },
+            { s: "After three years of hard work, she was given a", ans: "promotion" },
+            { s: "My contract says I have to work from 9 a.m. to 5 p.m., so I have fixed", ans: "working hours" },
+            { s: "The company provides a flat for foreign staff, so they get", ans: "rent-free accommodation" },
+            { s: "Since the factory shut down last month, he has been", ans: "unemployed" },
+            { s: "To become a professional lawyer, you need a university", ans: "qualification" },
+            { s: "He is unhappy with his pay; he wants a job with a higher", ans: "salary" },
+            { s: "The office is very dark and noisy; the staff hate the", ans: "working conditions" },
+            { s: "There is no chance to grow in this company; there are no", ans: "career prospects" }
+        ],
+        // VERSION 2
+        [
+            { s: "I enjoy my daily tasks and feel happy at work; I have high", ans: "job satisfaction" },
+            { s: "Please state if you are a teacher, a doctor, or a pilot in the", ans: "occupation" },
+            { s: "I can take time off when I am ill because my company offers", ans: "sick/holiday pay" },
+            { s: "Because the business is failing, fifty workers were made", ans: "redundant" },
+            { s: "Living in London is expensive, so the firm offers", ans: "rent-free accommodation" },
+            { s: "She is looking for a new role because she is currently", ans: "unemployed" },
+            { s: "I want a better work-life balance with more flexible", ans: "working hours" },
+            { s: "He moved to a more senior position after his", ans: "promotion" },
+            { s: "The employees are more productive because of the improved", ans: "working conditions" }
+        ],
+        // VERSION 3
+        [
+            { s: "At the end of every month, I receive my", ans: "salary" },
+            { s: "When people ask about my", ans: "occupation" },
+            { s: "You won't get an interview if you don't have the right", ans: "qualification" },
+            { s: "Helping people gives me a real sense of", ans: "job satisfaction" },
+            { s: "I don't worry about being ill because I get", ans: "sick/holiday pay" },
+            { s: "This industry is growing fast, so it has excellent", ans: "career prospects" },
+            { s: "The machine replaced his job, and he was made", ans: "redundant" },
+            { s: "The package includes a free apartment, which is called", ans: "rent-free accommodation" },
+            { s: "He has no income at the moment because he is", ans: "unemployed" }
+        ],
+        // VERSION 4 (Continuing with Navigate context)
+        [
+            { s: "She was moved to a managerial level thanks to her", ans: "promotion" },
+            { s: "Modern offices usually have very comfortable", ans: "working conditions" },
+            { s: "Medical staff often have to work long and difficult", ans: "working hours" },
+            { s: "My bank balance increases when I am paid my monthly", ans: "salary" },
+            { s: "Engineering is a very specialized and technical", ans: "occupation" },
+            { s: "Thousands of people in the city are currently", ans: "unemployed" },
+            { s: "One benefit of a permanent contract is getting", ans: "sick/holiday pay" },
+            { s: "The most important thing for me is feeling happy at work, or", ans: "job satisfaction" },
+            { s: "I need to pass this exam to get a professional", ans: "qualification" }
+        ],
+        // VERSION 5
+        [
+            { s: "In a small family business, there aren't many", ans: "career prospects" },
+            { s: "She is highly paid and earns a very competitive", ans: "salary" },
+            { s: "Writing 'Software Developer' is how I describe my", ans: "occupation" },
+            { s: "The firm merged with another, so many managers became", ans: "redundant" },
+            { s: "The job in Dubai offers a tax-free salary and", ans: "rent-free accommodation" },
+            { s: "I prefer to start early and finish early; I like my", ans: "working hours" },
+            { s: "The main reason I stay at this job is my high level of", ans: "job satisfaction" },
+            { s: "He was able to apply for the role after getting his", ans: "qualification" },
+            { s: "When I had the flu, I was still paid because of", ans: "sick/holiday pay" }
+        ],
+        // VERSION 6
+        [
+            { s: "The employees complained to the boss about the dangerous", ans: "working conditions" },
+            { s: "If you work hard and reach your targets, you will get a", ans: "promotion" },
+            { s: "The government is trying to help people who are", ans: "unemployed" },
+            { s: "A move to a higher position usually results in a", ans: "promotion" },
+            { s: "Learning new skills will definitely improve your", ans: "career prospects" },
+            { s: "On the application form, please write your current", ans: "occupation" },
+            { s: "The automation of the warehouse made many manual workers", ans: "redundant" },
+            { s: "Creative freedom and a good boss lead to better", ans: "job satisfaction" },
+            { s: "Teaching requires a specific university", ans: "qualification" }
+        ]
+    ];
+
+    let currentQ = 0, score = 0, quizData = [], studentName = "", mistakes = [], isChecked = false;
+
+    function startQuiz() {
+        studentName = document.getElementById('student-name').value.trim();
+        if (!studentName) return alert("Please enter your name.");
+        
+        let attemptCount = parseInt(localStorage.getItem('quizAttempt') || "0");
+        let versionIndex = attemptCount % 6;
+        quizData = allVersions[versionIndex];
+        localStorage.setItem('quizAttempt', attemptCount + 1);
+
+        document.getElementById('start-screen').classList.add('hidden');
+        document.getElementById('main-quiz').classList.remove('hidden');
+        document.getElementById('version-tag').innerText = "Attempt Version: " + (versionIndex + 1);
+        loadQuestion();
+    }
+
+    function loadQuestion() {
+        const q = quizData[currentQ];
+        document.getElementById('sentence-display').innerHTML = `${q.s} <input type="text" id="ans-input" autocomplete="off">.`;
+        document.getElementById('feedback').innerText = "";
+        const input = document.getElementById('ans-input');
+        input.focus();
+        input.onkeypress = (e) => { if(e.key === 'Enter') handleButtonClick(); };
+        isChecked = false;
+        document.querySelector('#quiz-content button').innerText = "Check Answer";
+    }
+
+    function handleButtonClick() {
+        const input = document.getElementById('ans-input');
+        if (!isChecked) {
+            const userAns = input.value.trim().toLowerCase();
+            const correctAns = quizData[currentQ].ans.toLowerCase();
+            
+            if (userAns === correctAns) {
+                score++;
+                document.getElementById('feedback').innerHTML = "<span style='color:var(--success)'>✓ Correct</span>";
+            } else {
+                mistakes.push(`Q${currentQ+1}: ${quizData[currentQ].ans} | User: ${userAns || "(blank)"}`);
+                document.getElementById('feedback').innerHTML = `<span style='color:var(--error)'>✕ Answer: ${quizData[currentQ].ans}</span>`;
+            }
+            input.disabled = true;
+            isChecked = true;
+            document.querySelector('#quiz-content button').innerText = "Next Question";
+        } else {
+            currentQ++;
+            if (currentQ < 9) loadQuestion(); else finishQuiz();
+        }
+    }
+
+    function finishQuiz() {
+        const percent = Math.round((score / 9) * 100);
+        const payload = {
+            name: studentName,
+            score: score + " / 9",
+            percentage: percent + "%",
+            mistakes: mistakes.join(" // ")
+        };
+
+        fetch(SCRIPT_URL, { method: "POST", mode: "no-cors", body: JSON.stringify(payload) });
+
+        document.getElementById('quiz-content').innerHTML = `
+            <h2>Results Saved</h2>
+            <div style="font-size:3.5rem; color:var(--warning); margin: 20px 0;">${percent}%</div>
+            <p>${studentName}, you got ${score} / 9.</p>
+            <button onclick="location.reload()" id="next-btn">Next Attempt</button>
+        `;
+    }
+</script>
+</body>
+</html>
